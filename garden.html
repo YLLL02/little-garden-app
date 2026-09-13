@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的小花园 🌸</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#8BC34A;--green-dark:#689F38;--cream:#FDF8F0;--wood:#D4A574;
+  --wood-dark:#B8895A;--text:#5D4E37;--text-light:#8B7355;
+  --shadow:0 4px 20px rgba(139,195,74,.15);
+  --glass:rgba(253,248,240,.75);
+  --radius:16px;
+}
+html{font-size:16px}
+body{
+  font-family:"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:linear-gradient(135deg,#FDF8F0 0%,#E8F5E9 50%,#FFF8E1 100%);
+  min-height:100vh;color:var(--text);overflow-x:hidden;
+}
+body::before{
+  content:"🌸 🌿 ☀️ 🌻 🌸";position:fixed;top:10px;right:20px;
+  font-size:1.2rem;opacity:.3;pointer-events:none;z-index:0;
+  animation:float 6s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* Sidebar */
+.menu-btn{
+  position:fixed;top:16px;left:16px;z-index:200;
+  width:44px;height:44px;border:none;border-radius:12px;
+  background:var(--glass);backdrop-filter:blur(12px);
+  box-shadow:var(--shadow);font-size:1.4rem;cursor:pointer;
+  transition:transform .2s,background .2s;
+}
+.menu-btn:hover{transform:scale(1.05);background:rgba(139,195,74,.2)}
+.sidebar-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:300;
+  opacity:0;visibility:hidden;transition:opacity .3s;
+}
+.sidebar-overlay.open{opacity:1;visibility:visible}
+.sidebar{
+  position:fixed;top:0;left:-280px;width:280px;height:100%;
+  background:var(--glass);backdrop-filter:blur(20px);
+  box-shadow:4px 0 30px rgba(0,0,0,.1);z-index:400;
+  transition:left .3s ease;padding:60px 20px 20px;
+  overflow-y:auto;
+}
+.sidebar.open{left:0}
+.sidebar h2{font-size:1.3rem;color:var(--green-dark);margin-bottom:20px;text-align:center}
+.sidebar-item{
+  display:flex;align-items:center;gap:12px;padding:14px 16px;
+  border-radius:12px;cursor:pointer;margin-bottom:8px;
+  transition:background .2s,transform .2s;font-size:.95rem;
+}
+.sidebar-item:hover{background:rgba(139,195,74,.15);transform:translateX(4px)}
+.sidebar-item .icon{font-size:1.3rem}
+
+/* Pages */
+.page{display:none;min-height:100vh;padding:70px 20px 40px;max-width:900px;margin:0 auto;animation:fadeIn .4s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.back-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:10px 18px;border:none;border-radius:20px;
+  background:var(--glass);backdrop-filter:blur(8px);
+  box-shadow:var(--shadow);cursor:pointer;font-size:.9rem;
+  color:var(--text);margin-bottom:20px;transition:all .2s;
+}
+.back-btn:hover{background:rgba(139,195,74,.2);transform:translateX(-4px)}
+
+/* Cards */
+.card{
+  background:var(--glass);backdrop-filter:blur(12px);
+  border-radius:var(--radius);padding:20px;margin-bottom:16px;
+  box-shadow:var(--shadow);border:1px solid rgba(212,165,116,.2);
+  transition:transform .2s,box-shadow .2s;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(139,195,74,.2)}
+.card-title{font-size:1.1rem;font-weight:600;color:var(--green-dark);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+/* Home */
+.home-header{text-align:center;margin-bottom:24px}
+.home-title{font-size:2rem;color:var(--green-dark);margin-bottom:8px}
+.encourage{
+  font-size:1rem;color:var(--text-light);font-style:italic;
+  padding:12px 20px;background:rgba(139,195,74,.1);border-radius:20px;
+  display:inline-block;margin-bottom:16px;
+}
+.stats-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.stat-card{
+  background:var(--glass);backdrop-filter:blur(12px);border-radius:var(--radius);
+  padding:16px 24px;text-align:center;min-width:120px;
+  box-shadow:var(--shadow);border:1px solid rgba(212,165,116,.2);
+  cursor:pointer;transition:transform .2s,box-shadow .2s;
+}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(139,195,74,.2)}
+.stat-num{font-size:1.8rem;font-weight:700;color:var(--green)}
+.stat-label{font-size:.85rem;color:var(--text-light)}
+.diary-entry-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 24px;border:none;border-radius:24px;
+  background:linear-gradient(135deg,var(--green),var(--green-dark));
+  color:#fff;font-size:.95rem;cursor:pointer;
+  box-shadow:var(--shadow);transition:transform .2s;
+}
+.diary-entry-btn:hover{transform:scale(1.03)}
+
+.grid-row{display:grid;gap:14px;margin-bottom:14px}
+.grid-row-4{grid-template-columns:repeat(4,1fr)}
+.grid-row-3{grid-template-columns:repeat(3,1fr);max-width:75%;margin:0 auto}
+@media(max-width:700px){
+  .grid-row-4{grid-template-columns:repeat(2,1fr)}
+  .grid-row-3{grid-template-columns:repeat(2,1fr);max-width:100%}
+}
+.module-card{
+  background:var(--glass);backdrop-filter:blur(12px);
+  border-radius:var(--radius);padding:20px 12px;text-align:center;
+  cursor:pointer;box-shadow:var(--shadow);
+  border:1px solid rgba(212,165,116,.2);
+  transition:all .25s;
+}
+.module-card:hover{transform:translateY(-4px) scale(1.02);background:rgba(139,195,74,.12)}
+.module-card .emoji{font-size:2rem;margin-bottom:8px}
+.module-card .name{font-size:.85rem;color:var(--text);font-weight:500}
+
+/* Forms */
+.form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end}
+.form-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px}
+.form-group label{font-size:.8rem;color:var(--text-light)}
+input,select,textarea{
+  padding:10px 14px;border:2px solid rgba(212,165,116,.3);
+  border-radius:12px;background:rgba(255,255,255,.7);
+  font-size:.9rem;color:var(--text);font-family:inherit;
+  transition:border-color .2s,box-shadow .2s;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--green);
+  box-shadow:0 0 0 3px rgba(139,195,74,.2);
+}
+textarea{resize:vertical;min-height:60px}
+.btn{
+  padding:10px 20px;border:none;border-radius:20px;cursor:pointer;
+  font-size:.9rem;font-family:inherit;transition:all .2s;
+}
+.btn-primary{background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;box-shadow:var(--shadow)}
+.btn-primary:hover{transform:scale(1.03);filter:brightness(1.05)}
+.btn-secondary{background:rgba(212,165,116,.3);color:var(--text)}
+.btn-secondary:hover{background:rgba(212,165,116,.5)}
+.btn-danger{background:#EF5350;color:#fff}
+.btn-danger:hover{filter:brightness(1.1)}
+.btn-sm{padding:6px 14px;font-size:.8rem;border-radius:14px}
+
+/* Todo */
+.todo-section{margin-bottom:20px}
+.todo-section-header{display:flex;align-items:center;justify-content:space-between;font-size:.95rem;color:var(--text-light);margin-bottom:10px}
+.todo-sub h4{font-size:.85rem;color:var(--text-light);margin:8px 0 6px;font-weight:normal}
+.regular-section,.special-section{padding:14px;border-radius:12px;margin-bottom:16px}
+.regular-section{background:rgba(139,195,74,.08);border:1px solid rgba(139,195,74,.2)}
+.special-section{background:rgba(212,165,116,.12);border:1px solid rgba(212,165,116,.25)}
+.add-plus-btn{width:32px;height:32px;border:none;border-radius:50%;background:var(--green);color:#fff;font-size:1.2rem;cursor:pointer;line-height:1;transition:transform .2s;flex-shrink:0}
+.add-plus-btn:hover{transform:scale(1.1)}
+.unit-toggle{cursor:pointer;color:var(--green-dark);text-decoration:underline;font-size:.85rem}
+.unit-toggle:hover{color:var(--green)}
+.todo-section h3{font-size:.95rem;color:var(--text-light);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.todo-item{
+  display:flex;align-items:center;gap:12px;padding:12px 16px;
+  background:rgba(255,255,255,.5);border-radius:12px;margin-bottom:8px;
+  transition:all .3s;
+}
+.todo-item.done{opacity:.6;background:rgba(139,195,74,.08)}
+.todo-item.done .todo-text{text-decoration:line-through;color:var(--text-light)}
+.todo-check{
+  width:26px;height:26px;border-radius:50%;border:2px solid var(--green);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .2s;font-size:.8rem;
+}
+.todo-check:hover{background:rgba(139,195,74,.2)}
+.todo-check.checked{background:var(--green);color:#fff;border-color:var(--green)}
+.todo-text{flex:1;font-size:.95rem}
+.todo-tag{
+  font-size:.7rem;padding:2px 8px;border-radius:8px;
+  background:rgba(212,165,116,.3);color:var(--wood-dark);
+}
+.todo-actions{display:flex;gap:6px;position:relative}
+.todo-menu-btn{background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-light);padding:2px 8px;border-radius:8px;letter-spacing:2px;line-height:1}
+.todo-menu-btn:hover{background:rgba(139,195,74,.15);color:var(--text)}
+.todo-menu-popup{position:absolute;right:0;top:calc(100% + 4px);background:#fff;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.15);border:1px solid rgba(212,165,116,.3);z-index:50;min-width:110px;overflow:hidden;display:none}
+.todo-menu-popup.open{display:block}
+.todo-menu-popup button{display:block;width:100%;border:none;background:none;padding:10px 14px;cursor:pointer;font-size:.85rem;color:var(--text);text-align:left}
+.todo-menu-popup button:hover{background:rgba(139,195,74,.12)}
+.todo-date-nav{display:flex;align-items:center;gap:8px}
+.todo-date-nav .nav-arrow{width:32px;height:32px;border:none;border-radius:50%;background:rgba(139,195,74,.15);color:var(--green-dark);font-size:1rem;cursor:pointer;flex-shrink:0;transition:all .2s}
+.todo-date-nav .nav-arrow:hover{background:var(--green);color:#fff}
+.todo-item-enter{animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+
+/* Weight */
+.weight-diff{font-size:.85rem;margin-left:8px}
+.weight-diff.up{color:#EF5350}
+.weight-diff.down{color:var(--green)}
+.chart-container{margin:16px 0;text-align:center}
+.chart-container canvas{max-width:100%;border-radius:12px;background:rgba(255,255,255,.5)}
+
+/* Lists */
+.list-item{
+  display:flex;align-items:center;gap:10px;padding:12px 16px;
+  background:rgba(255,255,255,.5);border-radius:12px;margin-bottom:8px;
+  transition:all .2s;
+}
+.list-item.completed{opacity:.55;order:1}
+.list-info{flex:1}
+.list-info .title{font-weight:500}
+.list-info .sub{font-size:.8rem;color:var(--text-light);margin-top:2px}
+.list-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* Diary */
+.diary-star{font-size:1.2rem;color:#FFD54F;margin-right:6px}
+.diary-input-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.diary-input-row input{flex:1}
+.diary-history-item{
+  padding:14px;border-radius:12px;background:rgba(255,255,255,.5);
+  margin-bottom:10px;
+}
+.diary-history-item .date{font-weight:600;color:var(--green-dark);margin-bottom:8px}
+.diary-history-item li{margin-left:20px;margin-bottom:4px;list-style:none}
+.diary-history-item li::before{content:"⭐ ";color:#FFD54F}
+
+/* Empty state */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-light)}
+.empty-state .emoji{font-size:3rem;margin-bottom:12px;display:block}
+.empty-state p{font-size:.95rem;line-height:1.6}
+
+/* Modal */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;visibility:hidden;transition:opacity .3s;
+}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal{
+  background:var(--cream);border-radius:20px;padding:28px;
+  max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.15);
+  transform:scale(.9);transition:transform .3s;
+  border:2px solid rgba(139,195,74,.3);text-align:center;
+}
+.modal-overlay.open .modal{transform:scale(1)}
+.modal .flower{font-size:3rem;margin-bottom:12px}
+.modal h3{color:var(--green-dark);margin-bottom:10px}
+.modal p{color:var(--text);margin-bottom:20px;line-height:1.5;font-size:.95rem}
+.modal-btns{display:flex;gap:10px;justify-content:center}
+.confirm-modal .modal{text-align:left}
+.confirm-modal .modal-btns{justify-content:flex-end;margin-top:16px}
+
+/* Toast */
+.toast{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);
+  background:var(--glass);backdrop-filter:blur(12px);
+  padding:12px 24px;border-radius:20px;box-shadow:var(--shadow);
+  z-index:600;font-size:.9rem;color:var(--green-dark);
+  transition:transform .4s ease;border:1px solid rgba(139,195,74,.3);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Confetti */
+.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:700;overflow:hidden}
+.confetti-piece{
+  position:absolute;width:10px;height:10px;border-radius:2px;
+  animation:confettiFall 2s ease-out forwards;
+}
+@keyframes confettiFall{
+  0%{transform:translateY(0) rotate(0);opacity:1}
+  100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+}
+
+/* Custom Date Picker */
+.date-picker-wrap,.time-picker-wrap{position:relative;display:inline-block}
+.date-display,.time-display{
+  padding:10px 14px;border:2px solid rgba(212,165,116,.3);
+  border-radius:12px;background:rgba(255,255,255,.7);cursor:pointer;
+  font-size:.9rem;color:var(--text);min-width:140px;
+  transition:border-color .2s;
+}
+.date-display:hover,.time-display:hover{border-color:var(--green)}
+.picker-popup{
+  position:absolute;top:calc(100% + 6px);left:0;z-index:100;
+  background:linear-gradient(135deg,var(--cream),#E8F5E9);
+  border-radius:16px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.12);
+  border:2px solid rgba(139,195,74,.2);min-width:280px;
+  opacity:0;visibility:hidden;transform:translateY(-8px);
+  transition:all .25s;
+}
+.picker-popup.open{opacity:1;visibility:visible;transform:translateY(0)}
+.picker-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.picker-header button{
+  background:none;border:none;font-size:1.2rem;cursor:pointer;
+  color:var(--green-dark);padding:4px 8px;border-radius:8px;
+}
+.picker-header button:hover{background:rgba(139,195,74,.15)}
+.picker-header span{font-weight:600;color:var(--green-dark)}
+.picker-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;text-align:center;font-size:.75rem;color:var(--text-light)}
+.picker-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.picker-day{
+  width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;cursor:pointer;font-size:.85rem;transition:all .15s;
+  margin:0 auto;
+}
+.picker-day:hover{background:rgba(139,195,74,.2)}
+.picker-day.selected{background:var(--green);color:#fff;font-weight:600}
+.picker-day.today{box-shadow:0 0 0 2px var(--green)}
+.picker-day.other{color:#ccc}
+.picker-day.empty{cursor:default}
+.time-picker-row{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0}
+.time-picker-row select{
+  padding:8px 12px;border-radius:10px;border:2px solid rgba(212,165,116,.3);
+  background:rgba(255,255,255,.8);font-size:1rem;color:var(--text);
+  cursor:pointer;
+}
+.time-picker-row span{font-size:1.2rem;color:var(--green-dark);font-weight:600}
+.picker-confirm{
+  display:block;width:100%;margin-top:12px;padding:10px;
+  border:none;border-radius:12px;background:var(--green);color:#fff;
+  cursor:pointer;font-size:.9rem;
+}
+.picker-confirm:hover{background:var(--green-dark)}
+
+/* Expense analysis */
+.analysis-card{background:rgba(139,195,74,.08);border-radius:12px;padding:16px;margin-top:12px}
+.analysis-total{font-size:1.5rem;font-weight:700;color:var(--green-dark);margin-bottom:8px}
+.category-bar{display:flex;height:24px;border-radius:12px;overflow:hidden;margin:12px 0}
+.category-segment{transition:width .5s ease}
+.category-legend{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:.8rem}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+.top3-list{margin-top:8px}
+.top3-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(212,165,116,.3);font-size:.9rem}
+
+/* Memo types */
+.memo-type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.memo-type-card{
+  padding:16px;border-radius:var(--radius);text-align:center;cursor:pointer;
+  background:rgba(255,255,255,.5);border:2px solid rgba(212,165,116,.2);
+  transition:all .2s;
+}
+.memo-type-card:hover{border-color:var(--green);background:rgba(139,195,74,.1);transform:scale(1.03)}
+.memo-type-card .type-name{font-weight:600;margin-bottom:4px}
+.memo-type-card .last-date{font-size:.8rem;color:var(--text-light)}
+
+/* Tabs */
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tab{
+  padding:8px 18px;border:none;border-radius:16px;cursor:pointer;
+  background:rgba(212,165,116,.2);color:var(--text);font-size:.85rem;
+  transition:all .2s;
+}
+.tab.active{background:var(--green);color:#fff}
+</style>
+</head>
+<body>
+
+<button class="menu-btn" onclick="toggleSidebar()" aria-label="菜单">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+  <h2>🌸 我的小花园</h2>
+  <div class="sidebar-item" onclick="navigate('home')"><span class="icon">🏠</span>首页</div>
+  <div class="sidebar-item" onclick="navigate('todo')"><span class="icon">✅</span>每日待办</div>
+  <div class="sidebar-item" onclick="navigate('food')"><span class="icon">🍱</span>健康生活</div>
+  <div class="sidebar-item" onclick="navigate('event')"><span class="icon">🔔</span>小花备忘录</div>
+  <div class="sidebar-item" onclick="navigate('memo')"><span class="icon">📅</span>重复事件</div>
+  <div class="sidebar-item" onclick="navigate('diary')"><span class="icon">⭐</span>花花日记</div>
+  <div class="sidebar-item" onclick="navigate('leisure')"><span class="icon">🎬</span>宝藏收藏夹</div>
+  <div class="sidebar-item" onclick="navigate('expense')"><span class="icon">💰</span>小金库记账</div>
+</nav>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="home-header">
+    <h1 class="home-title">🌻 我的小花园</h1>
+    <div class="encourage" id="encourageText"></div>
+    <div class="stats-row">
+      <div class="stat-card" onclick="navigate('todo')"><div class="stat-num" id="statDone">0</div><div class="stat-label">已完成 🌿</div></div>
+      <div class="stat-card" onclick="navigate('todo')"><div class="stat-num" id="statPending">0</div><div class="stat-label">未完成 🌱</div></div>
+      <div class="stat-card" onclick="navigate('history')"><div class="stat-num" id="statHistory">0</div><div class="stat-label">历史完成 📜</div></div>
+    </div>
+    <button class="diary-entry-btn" onclick="navigate('diary')">⭐ 今日日记</button>
+  </div>
+  <div class="grid-row grid-row-4" id="gridRow1"></div>
+  <div class="grid-row grid-row-3" id="gridRow2"></div>
+</div>
+
+<!-- TODO -->
+<div class="page" id="page-todo">
+  <button class="back-btn" onclick="navigate('home')">← 返回首页</button>
+  <div class="card">
+    <div class="card-title">✅ 每日待办</div>
+    <div class="form-row" style="margin-bottom:16px">
+      <div class="form-group"><label>查看日期</label><div class="todo-date-nav"><button class="nav-arrow" onclick="shiftTodoDate(-1)" title="上一天">＜</button><div id="todoViewDatePicker"></div><button class="nav-arrow" onclick="shiftTodoDate(1)" title="下一天">＞</button></div></div>
+    </div>
+    <div class="todo-section regular-section">
+      <h3 class="todo-section-header"><span>🌿 常规任务</span><button class="add-plus-btn" onclick="openTodoModal('auto')" title="添加常规任务">＋</button></h3>
+      <div id="todoRegularList"></div>
+    </div>
+    <div class="todo-section special-section">
+      <h3 class="todo-section-header"><span>✨ 特殊任务</span><button class="add-plus-btn" onclick="openTodoModal('special')" title="添加特殊任务">＋</button></h3>
+      <div id="todoSpecialList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="page-history">
+  <button class="back-btn" onclick="navigate('home')">← 返回首页</button>
+  <div class="card">
+    <div class="card-title">📜 历史完成</div>
+    <p style="font-size:.85rem;color:var(--text-light);margin-bottom:12px">所有已经完成的事件，最新完成的排在最上面</p>
+    <div id="historyList"></div>
+  </div>
+</div>
+
+<!-- FOOD -->
+<div class="page" id="page-food">
+  <button class="back-btn" onclick="navigate('home')">← 返回首页</button>
+  <div class="card">
+    <div class="card-title">⚖️ 体重记录</div>
+    <div class="form-row">
+      <div class="form-group"><label>日期</label><div id="weightDatePicker"></div></div>
+      <div class="form-group"><label>体重(<span class="unit-toggle" onclick="toggleWeightUnit()" id="weightUnitLabel">kg</span>)</label><input type="number" id="weightInput" step="0.1" placeholder="120.0"></div>
+      <button class="btn btn-primary" onclick="addWeight()">记录</button>
+    </div>
+    <div id="weightList"></div>
+    <button class="btn btn-secondary" style="margin-top:12px" onclick="renderWeightChart()">📊 查看当月趋势</button>
+    <div class="chart-container"><canvas id="weightChart" width="600" height="300" style="display:none"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🍱 用餐记录</div>
+    <div class="form-row">
+      <div class="form-group"><label>餐次</label>
+        <select id="mealType"><option>早餐</option><option>午餐</option><option>晚餐</option><option>加餐</option></select>
+      </div>
+      <div class="form-group"><label>时间</label><div id="mealTimePicker"></div></div>
+      <button class="btn btn-primary" onclick="addMeal()">记录</button>
+    </div>
+    <div id="mealList"></div>
+  </div>
+</div>
+
+<!-- EVENT -->
+<div class="page" id="page-event">
+  <button class="back-btn" onclick="navigate('home')">← 返回首页</button>
+  <div class="card">
+    <div class="card-title">🔔 小花备忘录</div>
+    <div class="form-row">
+      <div class="form-group"><label>标题</label><input id="eventTitle" placeholder="事件名称"></div>
+      <div class="form-group"><label>日期</label><div id="eventDatePicker"></div></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px"><label>备注</label><textarea id="eventNote" placeholder="备注信息..."></textarea></div>
+    <button class="btn btn-primary" onclick="addEvent()">添加事件 🌸</button>
+    <div id="eventList" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- MEMO -->
+<div class="page" id="page-memo">
+  <button class="back-btn" onclick="navigate('home')">← 返回首页</button>
+  <div class="card">
+    <div class="card-title">📅 重复事件</div>
+    <div class="form-row">
+      <div class="form-group"><label>新建类型</label><input id="memoTypeInput" placeholder="如：大姨妈、洗头发"></div>
+      <button class="btn btn-primary" onclick="addMemoType()">创建</button>
+    </div>
+    <div class="memo-type-grid" id="memoTypeGrid"></div>
+    <div id="memoHistory"></div>
+  </div>
+</div>
+
+<!-- DIARY -->
+<div class="page" id="page-diary">
+  <button class="back-btn" onclick="navigate('home')">← 返回首页</button>
+  <div class="card" style="position:relative;overflow:hidden">
+    <div class="card-title">⭐ 花花日记</div>
+    <div class="form-row" style="margin-bottom:12px">
+      <div class="form-group"><label>选择日期</label><div id="diaryDatePicker"></div></div>
+    </div>
+    <p style="font-size:.85rem;color:var(--text-light);margin-bottom:16px">写下3件好玩，有趣或者特别的事吧 ✨</p>
+    <div id="diaryInputs"></div>
+    <button class="btn btn-primary" onclick="saveDiary()" style="margin-top:8px">保存日记 🌸</button>
+    <div id="diaryHistorySection" style="margin-top:24px"></div>
+  </div>
+</div>
+
+<!-- LEISURE -->
+<div class="page" id="page-leisure">
+  <button class="back-btn" onclick="navigate('home')">← 返回首页</button>
+  <div class="card">
+    <div class="card-title">🎬 宝藏收藏夹 <span id="leisurePending" style="font-size:.8rem;color:var(--text-light)"></span></div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchLeisureTab('book',this)">📚 书单</button>
+      <button class="tab" onclick="switchLeisureTab('movie',this)">🎬 影单</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>名称</label><input id="leisureName" placeholder="书名/片名"></div>
+      <div class="form-group"><label>推荐人</label><input id="leisureRecommender" placeholder="谁推荐的"></div>
+      <button class="btn btn-primary" onclick="addLeisure()">添加</button>
+    </div>
+    <div id="leisureList"></div>
+  </div>
+</div>
+
+<!-- EXPENSE -->
+<div class="page" id="page-expense">
+  <button class="back-btn" onclick="navigate('home')">← 返回首页</button>
+  <div class="card">
+    <div class="card-title">💰 小金库记账</div>
+    <div class="form-row">
+      <div class="form-group"><label>金额</label><input type="number" id="expenseAmount" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label>分类</label>
+        <select id="expenseCategory"><option>餐饮</option><option>购物</option><option>交通</option><option>娱乐</option><option>学习</option><option>其他</option></select>
+      </div>
+      <div class="form-group"><label>时间</label><div id="expenseTimePicker"></div></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px"><label>备注</label><input id="expenseNote" placeholder="买了什么..."></div>
+    <button class="btn btn-primary" onclick="addExpense()">记账 💸</button>
+    <div id="expenseList" style="margin-top:16px"></div>
+    <button class="btn btn-secondary" style="margin-top:12px" onclick="renderExpenseAnalysis()">📊 月度分析</button>
+    <div id="expenseAnalysis"></div>
+  </div>
+</div>
+
+<!-- Reminder Modal -->
+<div class="modal-overlay" id="reminderModal">
+  <div class="modal">
+    <div class="flower">🌸</div>
+    <h3 id="reminderTitle">小花提醒</h3>
+    <p id="reminderText"></p>
+    <div class="modal-btns"><button class="btn btn-primary" onclick="dismissReminder()">我知道了 🌿</button></div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay confirm-modal" id="confirmModal">
+  <div class="modal">
+    <h3>🌿 确认删除</h3>
+    <p id="confirmText">确定要删除吗？</p>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeConfirm(false)">取消</button>
+      <button class="btn btn-danger" onclick="closeConfirm(true)">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Todo Add Modal -->
+<div class="modal-overlay confirm-modal" id="todoAddModal">
+  <div class="modal">
+    <h3 id="todoAddModalTitle">添加任务</h3>
+    <div class="form-group" style="margin-bottom:12px"><label>事项名称</label><input id="todoModalName" placeholder="任务名称"></div>
+    <div class="form-group" id="todoModalDateGroup" style="margin-bottom:16px"><label>事件日期</label><div id="todoModalDatePicker"></div></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeTodoModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveTodoModal()">添加</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="confetti-container" id="confetti"></div>
+
+<script>
+// ========== Storage ==========
+const STORE = {
+  get(k, d = []) { try { return JSON.parse(localStorage.getItem('garden_' + k)) ?? d; } catch { return d; } },
+  set(k, v) { localStorage.setItem('garden_' + k, JSON.stringify(v)); }
+};
+
+// ========== Utils ==========
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const nowTime = () => { const d = new Date(); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+const nowTimeSec = () => { const d = new Date(); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`; };
+const nowDateTimeSec = () => `${today()} ${nowTimeSec()}`;
+const daysBetween = (a, b) => Math.floor((new Date(String(b).slice(0,10)) - new Date(String(a).slice(0,10))) / 86400000);
+const nextDay = (d) => { const dt = new Date(d); dt.setDate(dt.getDate() + 1); return formatDate(dt); };
+const formatDate = d => { const dt = new Date(d); return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; };
+const memoRecordDate = r => r.datetime ? r.datetime.slice(0, 10) : (r.date || '');
+const memoRecordDisplay = r => r.datetime || (r.date ? r.date + ' 00:00:00' : '');
+
+const ENCOURAGES = [
+  "今天也是充满希望的一天 🌸","你比想象中更强大 💪","每一步都算数 🌿",
+  "慢慢来，比较快 ☀️","你已经很棒了 ⭐","小进步也是进步 🌱",
+  "给自己一点温柔 🌸","今天值得被好好对待 💚","你正在变成更好的人 🌻",
+  "相信过程，享受当下 🍃","你的努力不会白费 ✨","做自己的太阳 ☀️",
+  "今天也要开心呀 🌈","你值得所有美好 🌺","保持热爱，奔赴山海 🌊",
+  "生活因你而精彩 🎀","每一个今天都是礼物 🎁","你是最独特的存在 🦋",
+  "加油，小花园的主人 🌷","愿你的每一天都闪闪发光 ⭐",
+  "休息也是成长的一部分 🌙","你已经完成了很多 🎉","明天会更好 🌅",
+  "记得对自己微笑 😊"
+];
+
+const COMPLETE_MSGS = [
+  "太棒了！又完成一项 🌸","你真厉害！继续加油 ⭐","花园又茂盛了一点 🌿",
+  "给自己鼓鼓掌 👏","完成！今天也是美好的一天 ☀️","好样的！🌻"
+];
+
+const MODULES = [
+  { id:'todo', emoji:'✅', name:'每日待办' },
+  { id:'food', emoji:'🍱', name:'健康生活' },
+  { id:'event', emoji:'🔔', name:'小花备忘录' },
+  { id:'memo', emoji:'📅', name:'重复事件' },
+  { id:'diary', emoji:'⭐', name:'花花日记' },
+  { id:'leisure', emoji:'🎬', name:'宝藏收藏夹' },
+  { id:'expense', emoji:'💰', name:'小金库记账' }
+];
+
+const AUTO_TASKS = ['体能训练','肌肉拉伸','眼睛训练','表达能力'];
+const CAT_COLORS = { '餐饮':'#8BC34A','购物':'#D4A574','交通':'#64B5F6','娱乐':'#FFB74D','学习':'#BA68C8','其他':'#90A4AE' };
+
+let confirmCallback = null;
+let currentReminder = null;
+let leisureTab = 'book';
+let pickerInstances = {};
+let todoViewDate = today();
+let todoModalType = 'auto';
+let weightUnit = 'kg';
+let todoModalPickerReady = false;
+
+// ========== Toast ==========
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ========== Confirm ==========
+function showConfirm(text, cb) {
+  document.getElementById('confirmText').textContent = text;
+  document.getElementById('confirmModal').classList.add('open');
+  confirmCallback = cb;
+}
+function closeConfirm(yes) {
+  document.getElementById('confirmModal').classList.remove('open');
+  if (yes && confirmCallback) confirmCallback();
+  confirmCallback = null;
+}
+
+// ========== Confetti ==========
+function launchConfetti() {
+  const c = document.getElementById('confetti');
+  c.innerHTML = '';
+  const colors = ['#8BC34A','#FFD54F','#FF8A65','#64B5F6','#F48FB1','#D4A574'];
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = '-10px';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDelay = Math.random() * 0.5 + 's';
+    p.style.animationDuration = (1.5 + Math.random()) + 's';
+    c.appendChild(p);
+  }
+  setTimeout(() => c.innerHTML = '', 3000);
+}
+
+// ========== Custom Date Picker ==========
+function createDatePicker(containerId, defaultVal, onChange) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  const val = defaultVal || today();
+  let viewDate = new Date(val);
+  let selected = val;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'date-picker-wrap';
+  const display = document.createElement('div');
+  display.className = 'date-display';
+  display.textContent = val + (val === today() ? ' 🌸' : '');
+  const popup = document.createElement('div');
+  popup.className = 'picker-popup';
+
+  function render() {
+    const y = viewDate.getFullYear(), m = viewDate.getMonth();
+    popup.innerHTML = '';
+    const header = document.createElement('div');
+    header.className = 'picker-header';
+    header.innerHTML = `<button type="button" data-a="prev">◀</button><span>${y}年${m+1}月</span><button type="button" data-a="next">▶</button>`;
+    popup.appendChild(header);
+    const weekdays = document.createElement('div');
+    weekdays.className = 'picker-weekdays';
+    weekdays.innerHTML = '日一二三四五六'.split('').map(d => `<div>${d}</div>`).join('');
+    popup.appendChild(weekdays);
+    const days = document.createElement('div');
+    days.className = 'picker-days';
+    const first = new Date(y, m, 1).getDay();
+    const total = new Date(y, m + 1, 0).getDate();
+    for (let i = 0; i < first; i++) days.innerHTML += '<div class="picker-day empty"></div>';
+    for (let d = 1; d <= total; d++) {
+      const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      let cls = 'picker-day';
+      if (ds === selected) cls += ' selected';
+      if (ds === today()) cls += ' today';
+      days.innerHTML += `<div class="${cls}" data-date="${ds}">${d}${ds===today()?'🌸':''}</div>`;
+    }
+    popup.appendChild(days);
+    const btn = document.createElement('button');
+    btn.className = 'picker-confirm';
+    btn.textContent = '确定';
+    btn.onclick = () => { popup.classList.remove('open'); updateDisplay(); if (onChange) onChange(selected); };
+    popup.appendChild(btn);
+
+    header.querySelector('[data-a=prev]').onclick = () => { viewDate.setMonth(viewDate.getMonth()-1); render(); };
+    header.querySelector('[data-a=next]').onclick = () => { viewDate.setMonth(viewDate.getMonth()+1); render(); };
+    days.querySelectorAll('.picker-day[data-date]').forEach(el => {
+      el.onclick = () => { selected = el.dataset.date; render(); updateDisplay(); popup.classList.remove('open'); if (onChange) onChange(selected); };
+    });
+  }
+
+  function updateDisplay() {
+    display.textContent = selected + (selected === today() ? ' 🌸' : '');
+  }
+
+  display.onclick = (e) => { e.stopPropagation(); document.querySelectorAll('.picker-popup.open').forEach(p => p.classList.remove('open')); popup.classList.add('open'); render(); };
+  wrap.appendChild(display);
+  wrap.appendChild(popup);
+  container.appendChild(wrap);
+  pickerInstances[containerId] = { get: () => selected, set: v => { selected = v; updateDisplay(); } };
+}
+
+function createTimePicker(containerId, defaultVal) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  let selected = defaultVal || nowTime();
+  const [h0, m0] = selected.split(':').map(Number);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'time-picker-wrap';
+  const display = document.createElement('div');
+  display.className = 'time-display';
+  display.textContent = selected;
+  const popup = document.createElement('div');
+  popup.className = 'picker-popup';
+  popup.style.minWidth = '200px';
+
+  let h = h0, m = m0;
+  function render() {
+    popup.innerHTML = `<div class="time-picker-row">
+      <select id="tpH">${Array.from({length:24},(_,i)=>`<option value="${i}" ${i===h?'selected':''}>${String(i).padStart(2,'0')}</option>`).join('')}</select>
+      <span>:</span>
+      <select id="tpM">${Array.from({length:60},(_,i)=>`<option value="${i}" ${i===m?'selected':''}>${String(i).padStart(2,'0')}</option>`).join('')}</select>
+    </div>
+    <button class="picker-confirm">确定</button>`;
+    popup.querySelector('#tpH').onchange = e => h = +e.target.value;
+    popup.querySelector('#tpM').onchange = e => m = +e.target.value;
+    popup.querySelector('.picker-confirm').onclick = () => {
+      selected = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      display.textContent = selected;
+      popup.classList.remove('open');
+    };
+  }
+
+  display.onclick = (e) => { e.stopPropagation(); document.querySelectorAll('.picker-popup.open').forEach(p => p.classList.remove('open')); popup.classList.add('open'); render(); };
+  wrap.appendChild(display);
+  wrap.appendChild(popup);
+  container.appendChild(wrap);
+  pickerInstances[containerId] = { get: () => selected, set: v => { selected = v; display.textContent = v; } };
+}
+
+document.addEventListener('click', () => document.querySelectorAll('.picker-popup.open').forEach(p => p.classList.remove('open')));
+
+// ========== Navigation ==========
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+  const renders = { home: renderHome, todo: renderTodos, history: renderHistory, food: renderFood, event: renderEvents, memo: renderMemo, diary: renderDiary, leisure: renderLeisure, expense: renderExpense };
+  if (renders[page]) renders[page]();
+  window.scrollTo(0, 0);
+}
+
+// ========== Home ==========
+function renderHome() {
+  document.getElementById('encourageText').textContent = ENCOURAGES[Math.floor(Math.random() * ENCOURAGES.length)];
+  initDailyTodos();
+  const todos = getTodayTodos();
+  const done = todos.filter(t => t.done).length;
+  const pending = todos.filter(t => !t.done).length;
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statPending').textContent = pending;
+  try {
+    const all = STORE.get('todos', []);
+    document.getElementById('statHistory').textContent = all.filter(t => t.done).length;
+  } catch(e) {}
+
+  const row1 = document.getElementById('gridRow1');
+  const row2 = document.getElementById('gridRow2');
+  row1.innerHTML = MODULES.slice(0, 4).map(m =>
+    `<div class="module-card" onclick="navigate('${m.id}')"><div class="emoji">${m.emoji}</div><div class="name">${m.name}</div></div>`
+  ).join('');
+  row2.innerHTML = MODULES.slice(4).map(m =>
+    `<div class="module-card" onclick="navigate('${m.id}')"><div class="emoji">${m.emoji}</div><div class="name">${m.name}</div></div>`
+  ).join('');
+}
+
+// ========== History (all completed) ==========
+function renderHistory() {
+  const all = STORE.get('todos', []).filter(t => t.done);
+  all.sort((a, b) => {
+    const ka = (a.doneAt || (a.date + ' 00:00:00')) + '_' + a.id;
+    const kb = (b.doneAt || (b.date + ' 00:00:00')) + '_' + b.id;
+    return kb.localeCompare(ka);
+  });
+  const el = document.getElementById('historyList');
+  if (!all.length) {
+    el.innerHTML = '<div class="empty-state"><span class="emoji">📜</span><p>还没有已完成的事件，去完成第一个吧~</p></div>';
+    return;
+  }
+  el.innerHTML = all.map(t => {
+    const startDate = t.createdDate || t.date;
+    const doneDate = t.doneDate || (t.doneAt ? String(t.doneAt).slice(0, 10) : t.date);
+    const typeTag = t.type === 'auto' ? '🌿 常规' : '✨ 特殊';
+    return `<div class="list-item"><div class="list-info"><div class="title">${t.text}</div><div class="sub">${typeTag} · 开始日期: ${startDate} · 完成日期: ${doneDate}</div></div></div>`;
+  }).join('');
+}
+
+// ========== Todos ==========
+function getRegularTemplates() {
+  let templates = STORE.get('regularTemplates', null);
+  if (!templates || !Array.isArray(templates)) {
+    templates = AUTO_TASKS.map((text, i) => ({ id: 'def_' + i, text, addedDate: '2020-01-01' }));
+    STORE.set('regularTemplates', templates);
+    return templates;
+  }
+  let changed = false;
+  AUTO_TASKS.forEach((text, i) => {
+    const id = 'def_' + i;
+    if (!templates.some(t => t.id === id)) {
+      const sameText = templates.find(t => t.text === text && !t.removedDate);
+      if (!sameText) { templates.push({ id, text, addedDate: '2020-01-01' }); changed = true; }
+    }
+  });
+  if (changed) STORE.set('regularTemplates', templates);
+  return templates;
+}
+
+function getActiveRegularTemplates(forDate) {
+  return getRegularTemplates().filter(t => t.addedDate <= forDate && (!t.removedDate || t.removedDate > forDate));
+}
+
+function shiftDateStr(d, n) {
+  const dt = new Date(d + 'T12:00:00');
+  dt.setDate(dt.getDate() + n);
+  return formatDate(dt);
+}
+
+function ensureRegularForDate(date) {
+  let todos = STORE.get('todos', []);
+  let changed = false;
+  getActiveRegularTemplates(date).forEach(tmpl => {
+    let existing = todos.find(t => t.type === 'auto' && t.date === date && t.templateId === tmpl.id);
+    if (!existing) {
+      existing = todos.find(t => t.type === 'auto' && t.date === date && !t.templateId && t.text === tmpl.text);
+      if (existing) { existing.templateId = tmpl.id; changed = true; }
+      else { todos.push({ id: 't_' + Date.now() + '_' + Math.floor(Math.random()*100000), text: tmpl.text, type: 'auto', date, done: false, templateId: tmpl.id, createdDate: tmpl.addedDate && tmpl.addedDate > '2020-01-02' ? tmpl.addedDate : date }); changed = true; }
+    } else if (!existing.createdDate) { existing.createdDate = date; changed = true; }
+  });
+  if (changed) STORE.set('todos', todos);
+  return changed;
+}
+
+function ensureTodosForDate(date) {
+  ensureRegularForDate(date);
+  const td = today();
+  if (date === td) ensureTodaySpecials(date);
+  else if (date > td) cleanupFutureSpecials();
+}
+
+function getTodosForDate(date) {
+  ensureTodosForDate(date);
+  return STORE.get('todos', []).filter(t => t.date === date);
+}
+
+function cleanupFutureSpecials() {
+  try {
+    const td = today();
+    let todos = STORE.get('todos', []);
+    const before = todos.length;
+    todos = todos.filter(t => !(t.type === 'special' && t.date > td && (t.rolled || t.eventId)));
+    if (todos.length !== before) STORE.set('todos', todos);
+  } catch(e) {}
+}
+
+function ensureTodaySpecials(td) {
+  let todos = STORE.get('todos', []);
+  let changed = false;
+  if (syncEventTodos(todos, td)) changed = true;
+  if (rolloverFromYesterday(todos, td)) changed = true;
+  if (changed) STORE.set('todos', todos);
+}
+
+function catchUpRange() {
+  const td = today();
+  let lastDate = STORE.get('lastTodoDate', '');
+  try {
+    if (lastDate && lastDate < td) {
+      let cur = lastDate;
+      let guard = 0;
+      while (cur < td && guard < 62) {
+        cur = shiftDateStr(cur, 1);
+        ensureRegularForDate(cur);
+        let todos = STORE.get('todos', []);
+        let changed = false;
+        if (syncEventTodos(todos, cur)) changed = true;
+        if (rolloverFromYesterday(todos, cur)) changed = true;
+        if (changed) STORE.set('todos', todos);
+        guard++;
+      }
+      cleanupFutureSpecials();
+    } else {
+      ensureRegularForDate(td);
+      ensureTodaySpecials(td);
+    }
+  } catch(e) { ensureRegularForDate(td); try { ensureTodaySpecials(td); } catch(_e) {} }
+  STORE.set('lastTodoDate', td);
+}
+
+function initDailyTodos() {
+  const td = today();
+  if (STORE.get('lastTodoDate', '') !== td) catchUpRange();
+  else {
+    ensureRegularForDate(td);
+    ensureTodaySpecials(td);
+  }
+}
+
+function syncEventTodos(todos, td) {
+  let changed = false;
+  const events = STORE.get('events', []);
+  events.forEach(ev => {
+    const diff = daysBetween(td, ev.date);
+    if (diff === 1) {
+      const exists = todos.some(t => t.eventId === ev.id && t.date === td);
+      if (!exists) {
+        todos.push({ id: 't_' + Date.now() + '_' + Math.floor(Math.random()*100000), text: `📌 ${ev.title}`, type: 'special', date: td, done: false, eventId: ev.id, createdDate: td });
+        changed = true;
+      }
+    }
+  });
+  return changed;
+}
+
+function rolloverFromYesterday(todos, targetDate) {
+  let changed = false;
+  const prevDate = shiftDateStr(targetDate, -1);
+  const onTarget = todos.filter(t => t.type === 'special' && t.date === targetDate && !t.eventId);
+  const yesterdayOpen = todos.filter(t => t.type === 'special' && t.date === prevDate && !t.done && !t.eventId && !t.deleted);
+  yesterdayOpen.forEach(src => {
+    const root = src.rollRootId || src.id;
+    const already = onTarget.some(t => String(t.rollRootId || t.id) === String(root));
+    if (already) return;
+    const created = src.createdDate || src.date;
+    const nt = { id: 't_' + Date.now() + '_' + Math.floor(Math.random()*100000), text: src.text, type: 'special', date: targetDate, done: false, createdDate: created, rollRootId: root, rolled: true, carriedFrom: src.date };
+    todos.push(nt);
+    onTarget.push(nt);
+    changed = true;
+  });
+  return changed;
+}
+
+function getTodayTodos() {
+  return getTodosForDate(today());
+}
+
+function shiftTodoDate(n) {
+  todoViewDate = shiftDateStr(todoViewDate, n);
+  if (pickerInstances.todoViewDatePicker) pickerInstances.todoViewDatePicker.set(todoViewDate);
+  renderTodos();
+}
+
+function openTodoModal(type) {
+  todoModalType = type;
+  document.getElementById('todoAddModalTitle').textContent = type === 'auto' ? '🌿 添加常规任务' : '✨ 添加特殊任务';
+  document.getElementById('todoModalName').value = '';
+  document.getElementById('todoModalDateGroup').style.display = type === 'auto' ? 'none' : 'flex';
+  if (type === 'special') {
+    if (!todoModalPickerReady) {
+      createDatePicker('todoModalDatePicker', today());
+      todoModalPickerReady = true;
+    } else if (pickerInstances.todoModalDatePicker) {
+      pickerInstances.todoModalDatePicker.set(today());
+    }
+  }
+  document.getElementById('todoAddModal').classList.add('open');
+}
+
+function closeTodoModal() {
+  document.getElementById('todoAddModal').classList.remove('open');
+}
+
+function saveTodoModal() {
+  const text = document.getElementById('todoModalName').value.trim();
+  if (!text) return showToast('请输入事项名称 🌸');
+  const effectiveDate = todoModalType === 'auto' ? today() : pickerInstances.todoModalDatePicker.get();
+  if (todoModalType === 'auto') {
+    const templates = getRegularTemplates();
+    const nid = 'rt_' + Date.now();
+    templates.push({ id: nid, text, addedDate: today() });
+    STORE.set('regularTemplates', templates);
+    let todos = STORE.get('todos', []);
+    todos.push({ id: 't_' + Date.now() + '_' + Math.floor(Math.random()*100000), text, type: 'auto', date: today(), done: false, templateId: nid, createdDate: today() });
+    STORE.set('todos', todos);
+    showToast('常规任务已添加 🌿');
+    closeTodoModal();
+    todoViewDate = today();
+    if (pickerInstances.todoViewDatePicker) pickerInstances.todoViewDatePicker.set(todoViewDate);
+    renderTodos();
+  } else {
+    const todos = STORE.get('todos', []);
+    const nid = 't_' + Date.now() + '_' + Math.floor(Math.random()*100000);
+    todos.push({ id: nid, text, type: 'special', date: effectiveDate, done: false, createdDate: effectiveDate, rollRootId: nid });
+    STORE.set('todos', todos);
+    showToast('特殊任务已添加 ✨');
+    closeTodoModal();
+    todoViewDate = effectiveDate;
+    if (pickerInstances.todoViewDatePicker) pickerInstances.todoViewDatePicker.set(effectiveDate);
+    renderTodos();
+  }
+}
+
+function escHtml(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderTodos() {
+  initDailyTodos();
+  if (pickerInstances.todoViewDatePicker) {
+    try { todoViewDate = pickerInstances.todoViewDatePicker.get(); } catch(e) {}
+  }
+  const date = todoViewDate;
+  const td = today();
+  if (date !== td && document.getElementById('page-todo').classList.contains('active')) {
+  }
+  const todos = getTodosForDate(date);
+  const renderItem = (t, isRegular) => {
+    const isDone = !!t.done;
+    const sid = String(t.id);
+    let extra = '';
+    if (!isRegular && t.type === 'special' && !t.eventId) {
+      const cd = t.createdDate || t.date;
+      if (cd && cd !== date) extra = `<span class="todo-tag">${escHtml(cd)}添加</span>`;
+    }
+    return `<div class="todo-item ${isDone?'done':''} todo-item-enter">
+      <div class="todo-check ${isDone?'checked':''}" onclick="toggleTodo('${sid}')">${isDone?'✓':''}</div>
+      <span class="todo-text">${escHtml(t.text)}</span>
+      ${extra}
+      <div class="todo-actions">
+        <button class="todo-menu-btn" onclick="toggleTodoMenu(event,'${sid}')" title="更多">···</button>
+        <div class="todo-menu-popup" id="menu_${sid}">
+          <button onclick="menuEditTodo('${sid}')">编辑</button>
+          <button onclick="menuDeleteTodo('${sid}')">删除</button>
+        </div>
+      </div>
+    </div>`;
+  };
+  const sortMixed = (list, isRegular) => {
+    if (isRegular) {
+      const pend = list.filter(t => !t.done);
+      const done = list.filter(t => t.done);
+      return [...pend, ...done];
+    }
+    const pend = list.filter(t => !t.done);
+    const done = list.filter(t => t.done);
+    const todayNew = pend.filter(t => !t.rolled && (t.createdDate || t.date) === date);
+    const carried = pend.filter(t => !( !t.rolled && (t.createdDate || t.date) === date));
+    carried.sort((a, b) => String(b.createdDate || b.date).localeCompare(String(a.createdDate || a.date)));
+    return [...todayNew, ...carried, ...done];
+  };
+  const regular = sortMixed(todos.filter(t => t.type === 'auto'), true);
+  const special = sortMixed(todos.filter(t => t.type === 'special'), false);
+  document.getElementById('todoRegularList').innerHTML = regular.length ? regular.map(t => renderItem(t, true)).join('') :
+    '<div class="empty-state" style="padding:16px"><span class="emoji">🌱</span><p>暂无常规任务~</p></div>';
+  document.getElementById('todoSpecialList').innerHTML = special.length ? special.map(t => renderItem(t, false)).join('') :
+    '<div class="empty-state" style="padding:16px"><span class="emoji">✨</span><p>暂无特殊任务~</p></div>';
+}
+
+function toggleTodoMenu(e, sid) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  const el = document.getElementById('menu_' + sid);
+  const wasOpen = el && el.classList.contains('open');
+  document.querySelectorAll('.todo-menu-popup.open').forEach(p => p.classList.remove('open'));
+  if (el && !wasOpen) el.classList.add('open');
+}
+document.addEventListener('click', () => document.querySelectorAll('.todo-menu-popup.open').forEach(p => p.classList.remove('open')));
+
+function findTodo(sid) {
+  const todos = STORE.get('todos', []);
+  return { todos, t: todos.find(x => String(x.id) === String(sid)) };
+}
+
+function toggleTodo(id) {
+  const { todos, t } = findTodo(id);
+  if (!t) return;
+  t.done = !t.done;
+  if (t.done) { t.doneAt = nowDateTimeSec(); t.doneDate = today(); }
+  else { delete t.doneAt; delete t.doneDate; }
+  STORE.set('todos', todos);
+  if (t.done) showToast(COMPLETE_MSGS[Math.floor(Math.random() * COMPLETE_MSGS.length)]);
+  renderTodos();
+  if (document.getElementById('page-home').classList.contains('active')) renderHome();
+}
+
+function menuEditTodo(sid) {
+  document.querySelectorAll('.todo-menu-popup.open').forEach(p => p.classList.remove('open'));
+  const { todos, t } = findTodo(sid);
+  if (!t) return;
+  const nv = prompt('编辑任务:', t.text);
+  if (nv === null || !nv.trim()) return;
+  t.text = nv.trim();
+  if (t.type === 'auto' && t.templateId) {
+    const templates = getRegularTemplates();
+    const tmpl = templates.find(x => x.id === t.templateId);
+    if (tmpl) {
+      tmpl.text = t.text;
+      STORE.set('regularTemplates', templates);
+      todos.forEach(x => { if (x.templateId === tmpl.id && !x.done && x.date >= todoViewDate) x.text = t.text; });
+    }
+  }
+  if (t.type === 'special' && !t.rolled) {
+    const root = t.rollRootId || t.id;
+    todos.forEach(x => { if (String(x.rollRootId || '') === String(root) && !x.done) x.text = t.text; });
+  }
+  STORE.set('todos', todos);
+  renderTodos();
+}
+
+function editTodo(id) { menuEditTodo(id); }
+
+function menuDeleteTodo(sid) {
+  document.querySelectorAll('.todo-menu-popup.open').forEach(p => p.classList.remove('open'));
+  const { t } = findTodo(sid);
+  if (!t) return;
+  if (t.type === 'auto') deleteRegularTodo(sid);
+  else deleteTodo(sid);
+}
+
+function deleteTodo(id) {
+  const { todos, t } = findTodo(id);
+  if (!t) return;
+  showConfirm('确定删除这个特殊任务吗？', () => {
+    let arr = STORE.get('todos', []);
+    const target = arr.find(x => String(x.id) === String(id));
+    const root = target ? (target.rollRootId || target.id) : null;
+    if (root) {
+      arr = arr.filter(x => !(String(x.rollRootId || x.id) === String(root) && !x.done && x.type === 'special' && !x.eventId));
+    }
+    arr = arr.filter(x => String(x.id) !== String(id));
+    STORE.set('todos', arr);
+    showToast('已删除 🌿');
+    renderTodos();
+  });
+}
+
+function deleteRegularTodo(id) {
+  const { t } = findTodo(id);
+  if (!t) return;
+  showConfirm('删除后当天及之后将不再出现此常规任务，之前的记录保留。确定吗？', () => {
+    const arr = STORE.get('todos', []);
+    const target = arr.find(x => String(x.id) === String(id));
+    let removeFrom = todoViewDate;
+    if (target && target.templateId) {
+      const templates = getRegularTemplates();
+      const tmpl = templates.find(x => x.id === target.templateId);
+      if (tmpl) {
+        if (!removeFrom || removeFrom < today()) removeFrom = today();
+        tmpl.removedDate = removeFrom;
+        STORE.set('regularTemplates', templates);
+      }
+    }
+    let next = arr.filter(x => !(x.type === 'auto' && target && target.templateId && x.templateId === target.templateId && x.date >= removeFrom));
+    if (!target || !target.templateId) next = arr.filter(x => String(x.id) !== String(id));
+    STORE.set('todos', next);
+    showToast('常规任务已删除 🌿');
+    renderTodos();
+  });
+}
+
+// ========== Food ==========
+function toggleWeightUnit() {
+  weightUnit = weightUnit === 'kg' ? '斤' : 'kg';
+  STORE.set('weightUnit', weightUnit);
+  document.getElementById('weightUnitLabel').textContent = weightUnit;
+  renderWeightList();
+}
+
+function displayWeight(kg) {
+  if (weightUnit === '斤') return (kg * 2).toFixed(1) + ' 斤';
+  return kg.toFixed(1) + ' kg';
+}
+
+function parseWeightInput(val) {
+  const n = parseFloat(val);
+  if (!n || n <= 0) return null;
+  return weightUnit === '斤' ? n / 2 : n;
+}
+
+function renderFood() {
+  document.getElementById('weightUnitLabel').textContent = weightUnit;
+  renderWeightList();
+  renderMealList();
+}
+
+function addWeight() {
+  const date = pickerInstances.weightDatePicker.get();
+  let weight = parseWeightInput(document.getElementById('weightInput').value);
+  if (!weight) return showToast('请输入有效体重 ⚖️');
+  const time = nowTimeSec();
+  const records = STORE.get('weight', []);
+  records.push({ id: Date.now(), date, time, weight });
+  STORE.set('weight', records);
+  document.getElementById('weightInput').value = '';
+  showToast('体重已记录 ⚖️');
+  renderWeightList();
+}
+
+function sortWeightRecords(records) {
+  return records.slice().sort((a, b) => {
+    const ka = a.date + ' ' + (a.time || '00:00:00');
+    const kb = b.date + ' ' + (b.time || '00:00:00');
+    return kb.localeCompare(ka);
+  });
+}
+
+function migrateWeightRecords() {
+  let records = STORE.get('weight', []);
+  let changed = false;
+  records = records.map(r => {
+    const nr = { ...r };
+    if (!nr.id) { nr.id = Date.now() + Math.random(); changed = true; }
+    if (!nr.time) { nr.time = '00:00:00'; changed = true; }
+    return nr;
+  });
+  if (changed) STORE.set('weight', records);
+}
+
+function renderWeightList() {
+  migrateWeightRecords();
+  const records = sortWeightRecords(STORE.get('weight', []));
+  if (!records.length) {
+    document.getElementById('weightList').innerHTML = '<div class="empty-state"><span class="emoji">⚖️</span><p>还没有体重记录，开始记录吧~</p></div>';
+    return;
+  }
+  const asc = records.slice().reverse();
+  document.getElementById('weightList').innerHTML = records.map((r) => {
+    const idx = asc.findIndex(x => x.id === r.id);
+    const prev = idx > 0 ? asc[idx - 1] : null;
+    let diffHtml = '';
+    if (prev) {
+      const diffKg = r.weight - prev.weight;
+      const diff = weightUnit === '斤' ? (diffKg * 2).toFixed(1) : diffKg.toFixed(1);
+      const cls = diffKg > 0 ? 'up' : 'down';
+      const sign = diffKg > 0 ? '+' : '';
+      const unit = weightUnit === '斤' ? '斤' : 'kg';
+      diffHtml = `<span class="weight-diff ${cls}">(${sign}${diff}${unit})</span>`;
+    }
+    const timeStr = r.time || '00:00:00';
+    return `<div class="list-item"><div class="list-info"><div class="title">${r.date} ${timeStr} · ${displayWeight(r.weight)} ${diffHtml}</div></div>
+      <div class="list-actions">
+        <button class="btn btn-sm btn-secondary" onclick="editWeight(${r.id})">编辑</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteWeight(${r.id})">删</button>
+      </div></div>`;
+  }).join('');
+}
+
+function editWeight(id) {
+  const records = STORE.get('weight', []);
+  const r = records.find(x => x.id === id);
+  if (!r) return;
+  const showVal = weightUnit === '斤' ? (r.weight * 2).toFixed(1) : r.weight;
+  const nv = prompt(`修改体重(${weightUnit}):`, showVal);
+  if (nv !== null) {
+    const parsed = parseWeightInput(nv);
+    if (parsed) { r.weight = parsed; STORE.set('weight', records); renderWeightList(); }
+  }
+}
+
+function deleteWeight(id) {
+  showConfirm('确定删除这条体重记录吗？', () => {
+    STORE.set('weight', STORE.get('weight', []).filter(r => r.id !== id));
+    renderWeightList();
+  });
+}
+
+function renderWeightChart() {
+  const canvas = document.getElementById('weightChart');
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  const now = new Date();
+  const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const all = STORE.get('weight', []).filter(r => r.date.startsWith(ym));
+  const byDay = {};
+  all.forEach(r => {
+    const k = r.date;
+    const ts = r.date + ' ' + (r.time || '00:00:00');
+    if (!byDay[k] || ts > byDay[k].ts) byDay[k] = { weight: r.weight, ts };
+  });
+  const records = Object.entries(byDay).map(([date, v]) => ({ date, weight: v.weight })).sort((a, b) => a.date.localeCompare(b.date));
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!records.length) {
+    ctx.fillStyle = '#8B7355'; ctx.font = '16px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('本月暂无体重数据 🌿', canvas.width/2, canvas.height/2);
+    return;
+  }
+  const pad = 40, w = canvas.width - pad * 2, h = canvas.height - pad * 2;
+  const maxW = Math.max(...records.map(r => r.weight)) + 1;
+  const minW = Math.min(...records.map(r => r.weight)) - 1;
+  const range = maxW - minW || 1;
+  const barW = Math.min(40, w / records.length - 8);
+  records.forEach((r, i) => {
+    const bh = ((r.weight - minW) / range) * h;
+    const x = pad + i * (w / records.length) + (w / records.length - barW) / 2;
+    const y = pad + h - bh;
+    ctx.fillStyle = '#8BC34A';
+    ctx.beginPath(); ctx.roundRect(x, y, barW, bh, 6); ctx.fill();
+    ctx.fillStyle = '#5D4E37'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(r.weight, x + barW/2, y - 6);
+    ctx.fillText(r.date.slice(8), x + barW/2, pad + h + 18);
+  });
+}
+
+function addMeal() {
+  const type = document.getElementById('mealType').value;
+  const time = pickerInstances.mealTimePicker.get();
+  const td = today();
+  const meals = STORE.get('meals', []);
+  meals.push({ id: Date.now(), type, time, date: td });
+  STORE.set('meals', meals);
+  showToast(`${type}已记录 🍱`);
+  renderMealList();
+}
+
+function renderMealList() {
+  const meals = STORE.get('meals', []).filter(m => m.date === today()).sort((a, b) => a.time.localeCompare(b.time));
+  if (!meals.length) {
+    document.getElementById('mealList').innerHTML = '<div class="empty-state"><span class="emoji">🍱</span><p>今天还没有用餐记录~</p></div>';
+    return;
+  }
+  document.getElementById('mealList').innerHTML = meals.map(m =>
+    `<div class="list-item"><div class="list-info"><div class="title">${m.type}</div><div class="sub">${m.time}</div></div>
+      <button class="btn btn-sm btn-danger" onclick="deleteMeal(${m.id})">删</button></div>`
+  ).join('');
+}
+
+function deleteMeal(id) {
+  showConfirm('确定删除这条用餐记录吗？', () => {
+    STORE.set('meals', STORE.get('meals', []).filter(m => m.id !== id));
+    renderMealList();
+  });
+}
+
+// ========== Events ==========
+function addEvent() {
+  const title = document.getElementById('eventTitle').value.trim();
+  const date = pickerInstances.eventDatePicker.get();
+  const note = document.getElementById('eventNote').value.trim();
+  if (!title) return showToast('请输入事件标题 🔔');
+  const events = STORE.get('events', []);
+  events.push({ id: Date.now(), title, date, note });
+  events.sort((a, b) => a.date.localeCompare(b.date));
+  STORE.set('events', events);
+  document.getElementById('eventTitle').value = '';
+  document.getElementById('eventNote').value = '';
+  showToast('事件已添加 🌸');
+  renderEvents();
+  initDailyTodos();
+}
+
+function renderEvents() {
+  const events = STORE.get('events', []).sort((a, b) => a.date.localeCompare(b.date));
+  if (!events.length) {
+    document.getElementById('eventList').innerHTML = '<div class="empty-state"><span class="emoji">🔔</span><p>还没有事件，添加一个吧~</p></div>';
+    return;
+  }
+  const td = today();
+  document.getElementById('eventList').innerHTML = events.map(ev => {
+    const diff = daysBetween(td, ev.date);
+    let badge = '';
+    if (diff === 0) badge = '<span class="todo-tag" style="background:#EF5350;color:#fff">今天</span>';
+    else if (diff > 0 && diff <= 5) badge = `<span class="todo-tag">${diff}天后</span>`;
+    else if (diff < 0) badge = '<span class="todo-tag" style="opacity:.5">已过期</span>';
+    return `<div class="list-item"><div class="list-info"><div class="title">${ev.title} ${badge}</div><div class="sub">${ev.date}${ev.note?' · '+ev.note:''}</div></div>
+      <div class="list-actions">
+        <button class="btn btn-sm btn-secondary" onclick="editEvent(${ev.id})">编辑</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteEvent(${ev.id})">删</button>
+      </div></div>`;
+  }).join('');
+}
+
+function editEvent(id) {
+  const events = STORE.get('events', []);
+  const ev = events.find(e => e.id === id);
+  if (!ev) return;
+  const title = prompt('编辑标题:', ev.title);
+  if (title === null) return;
+  const note = prompt('编辑备注:', ev.note);
+  if (title.trim()) ev.title = title.trim();
+  if (note !== null) ev.note = note.trim();
+  STORE.set('events', events);
+  renderEvents();
+}
+
+function deleteEvent(id) {
+  showConfirm('确定删除这个事件吗？', () => {
+    STORE.set('events', STORE.get('events', []).filter(e => e.id !== id));
+    renderEvents();
+  });
+}
+
+function checkReminders() {
+  const events = STORE.get('events', []);
+  const dismissed = STORE.get('dismissedReminders', {});
+  const td = today();
+  if (dismissed._date !== td) {
+    Object.keys(dismissed).forEach(k => { if (k !== '_date') delete dismissed[k]; });
+    dismissed._date = td;
+    STORE.set('dismissedReminders', dismissed);
+  }
+
+  for (const ev of events) {
+    const diff = daysBetween(td, ev.date);
+    if (diff === 5 || diff === 1) {
+      const key = `${ev.id}_${diff}`;
+      if (dismissed[key]) continue;
+      currentReminder = { event: ev, diff, key };
+      document.getElementById('reminderTitle').textContent = diff === 5 ? '🌸 五天提醒' : '🌺 明天提醒';
+      document.getElementById('reminderText').textContent = diff === 5
+        ? `「${ev.title}」还有5天就到了 (${ev.date})，记得准备哦~`
+        : `「${ev.title}」就是明天 (${ev.date}) 啦！${ev.note ? ev.note : '加油~'}`;
+      document.getElementById('reminderModal').classList.add('open');
+      return;
+    }
+  }
+}
+
+function dismissReminder() {
+  if (currentReminder) {
+    const dismissed = STORE.get('dismissedReminders', {});
+    dismissed._date = today();
+    dismissed[currentReminder.key] = true;
+    STORE.set('dismissedReminders', dismissed);
+    if (currentReminder.diff === 1) initDailyTodos();
+  }
+  document.getElementById('reminderModal').classList.remove('open');
+  currentReminder = null;
+  setTimeout(checkReminders, 500);
+}
+
+// ========== Memo ==========
+function addMemoType() {
+  const name = document.getElementById('memoTypeInput').value.trim();
+  if (!name) return showToast('请输入类型名称 📅');
+  const types = STORE.get('memoTypes', []);
+  if (types.some(t => t.name === name)) return showToast('该类型已存在');
+  types.push({ id: Date.now(), name, records: [] });
+  STORE.set('memoTypes', types);
+  document.getElementById('memoTypeInput').value = '';
+  showToast('类型已创建 🌸');
+  renderMemo();
+}
+
+function recordMemo(id) {
+  const types = STORE.get('memoTypes', []);
+  const t = types.find(x => x.id === id);
+  if (!t) return;
+  t.records.push({ datetime: nowDateTimeSec() });
+  STORE.set('memoTypes', types);
+  showToast(`${t.name} 已记录 📅`);
+  renderMemo();
+}
+
+function renderMemo() {
+  const types = STORE.get('memoTypes', []);
+  const td = today();
+  document.getElementById('memoTypeGrid').innerHTML = types.length ? types.map(t => {
+    const lastRec = t.records.length ? t.records[t.records.length - 1] : null;
+    const last = lastRec ? memoRecordDisplay(lastRec) : '暂无';
+    const days = lastRec ? daysBetween(memoRecordDate(lastRec), td) : '-';
+    return `<div class="memo-type-card" onclick="recordMemo(${t.id})">
+      <div class="type-name">${t.name}</div>
+      <div class="last-date">最近: ${last}</div>
+      <div class="last-date">${typeof days === 'number' ? '距今 '+days+' 天' : ''}</div>
+      <button class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="event.stopPropagation();editMemoType(${t.id})">编辑</button>
+      <button class="btn btn-sm btn-danger" style="margin-top:4px" onclick="event.stopPropagation();deleteMemoType(${t.id})">删</button>
+    </div>`;
+  }).join('') : '<div class="empty-state" style="grid-column:1/-1"><span class="emoji">📅</span><p>创建你的第一个日期类型吧~</p></div>';
+
+  let historyHtml = '<h3 style="margin:16px 0 10px;color:var(--text-light)">📖 历史记录</h3>';
+  let hasHistory = false;
+  types.forEach(t => {
+    if (t.records.length) {
+      hasHistory = true;
+      historyHtml += `<div class="card" style="padding:14px"><strong>${t.name}</strong>`;
+      t.records.slice().reverse().forEach((r, i) => {
+        const days = daysBetween(memoRecordDate(r), td);
+        historyHtml += `<div class="list-item" style="margin-top:6px"><div class="list-info"><div class="title">${memoRecordDisplay(r)}</div><div class="sub">距今 ${days} 天</div></div>
+          <button class="btn btn-sm btn-danger" onclick="deleteMemoRecord(${t.id},${t.records.length-1-i})">删</button></div>`;
+      });
+      historyHtml += '</div>';
+    }
+  });
+  document.getElementById('memoHistory').innerHTML = hasHistory ? historyHtml :
+    '<div class="empty-state"><span class="emoji">🌿</span><p>点击上方卡片记录日期~</p></div>';
+}
+
+function editMemoType(id) {
+  const types = STORE.get('memoTypes', []);
+  const t = types.find(x => x.id === id);
+  if (!t) return;
+  const nv = prompt('编辑类型名称:', t.name);
+  if (nv !== null && nv.trim()) { t.name = nv.trim(); STORE.set('memoTypes', types); renderMemo(); }
+}
+
+function deleteMemoType(id) {
+  showConfirm('确定删除这个类型及其所有记录吗？', () => {
+    STORE.set('memoTypes', STORE.get('memoTypes', []).filter(t => t.id !== id));
+    renderMemo();
+  });
+}
+
+function deleteMemoRecord(typeId, revIdx) {
+  showConfirm('确定删除这条记录吗？', () => {
+    const types = STORE.get('memoTypes', []);
+    const t = types.find(x => x.id === typeId);
+    if (t) { t.records.splice(t.records.length - 1 - revIdx, 1); STORE.set('memoTypes', types); renderMemo(); }
+  });
+}
+
+// ========== Diary ==========
+let diaryDate = today();
+let diaryPickerReady = false;
+function renderDiary() {
+  if (!diaryPickerReady) {
+    createDatePicker('diaryDatePicker', diaryDate, (d) => { diaryDate = d; renderDiary(); });
+    diaryPickerReady = true;
+  } else if (pickerInstances.diaryDatePicker) {
+    try { diaryDate = pickerInstances.diaryDatePicker.get(); } catch(e) {}
+  }
+  const td = today();
+  const diaries = STORE.get('diaries', {});
+  const cur = diaries[diaryDate] || ['', '', ''];
+  document.getElementById('diaryInputs').innerHTML = [0, 1, 2].map(i =>
+    `<div class="diary-input-row"><span class="diary-star">⭐</span><input id="diaryItem${i}" placeholder="第${i+1}件特别的事..." value="${escHtml(cur[i] || '')}"></div>`
+  ).join('');
+
+  const dates = Object.keys(diaries).sort((a, b) => b.localeCompare(a));
+  if (!dates.length) {
+    document.getElementById('diaryHistorySection').innerHTML = '<div class="empty-state"><span class="emoji">⭐</span><p>还没有日记记录，写下今天发生的好玩的、有趣的、特别的事情吧~</p></div>';
+    return;
+  }
+  document.getElementById('diaryHistorySection').innerHTML = '<h3 style="margin-bottom:12px;color:var(--green-dark)">📖 历史日记</h3>' + dates.map(d =>
+    `<div class="diary-history-item"><div class="date">${d}${d===td?' 🌸':''}</div><ul>${diaries[d].filter(x=>x).map(x=>`<li>${escHtml(x)}</li>`).join('')}</ul>
+      <button class="btn btn-sm btn-danger" onclick="deleteDiary('${d}')">删除</button></div>`
+  ).join('');
+}
+
+function saveDiary() {
+  const items = [0, 1, 2].map(i => document.getElementById('diaryItem' + i).value.trim());
+  const filled = items.filter(x => x).length;
+  if (filled === 0) return showToast('至少写一件特别的事吧 ⭐');
+  const diaries = STORE.get('diaries', {});
+  diaries[diaryDate] = items;
+  STORE.set('diaries', diaries);
+  if (filled === 3) {
+    launchConfetti();
+    showToast('太棒了！3条特别的事全部写完 🎉✨');
+  } else {
+    showToast(`已保存 ${filled} 条特别的事 ⭐`);
+  }
+  renderDiary();
+}
+
+function deleteDiary(date) {
+  showConfirm('确定删除这天的日记吗？', () => {
+    const diaries = STORE.get('diaries', {});
+    delete diaries[date];
+    STORE.set('diaries', diaries);
+    renderDiary();
+  });
+}
+
+// ========== Leisure ==========
+function switchLeisureTab(tab, el) {
+  leisureTab = tab;
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderLeisure();
+}
+
+function addLeisure() {
+  const name = document.getElementById('leisureName').value.trim();
+  const recommender = document.getElementById('leisureRecommender').value.trim();
+  if (!name) return showToast('请输入名称 🎬');
+  const items = STORE.get('leisure', []);
+  items.push({ id: Date.now(), type: leisureTab, name, recommender, done: false });
+  STORE.set('leisure', items);
+  document.getElementById('leisureName').value = '';
+  document.getElementById('leisureRecommender').value = '';
+  showToast('已添加到收藏夹 📚');
+  renderLeisure();
+}
+
+function renderLeisure() {
+  const items = STORE.get('leisure', []).filter(i => i.type === leisureTab);
+  const pending = items.filter(i => !i.done).length;
+  document.getElementById('leisurePending').textContent = `(待${leisureTab==='book'?'读':'看'}: ${pending})`;
+  const sorted = [...items.filter(i => !i.done), ...items.filter(i => i.done)];
+  if (!sorted.length) {
+    document.getElementById('leisureList').innerHTML = `<div class="empty-state"><span class="emoji">${leisureTab==='book'?'📚':'🎬'}</span><p>清单还是空的，添加第一个吧~</p></div>`;
+    return;
+  }
+  document.getElementById('leisureList').innerHTML = sorted.map(i =>
+    `<div class="list-item ${i.done?'completed':''}"><div class="list-info"><div class="title">${i.name}${i.done?' ✅':''}</div><div class="sub">推荐: ${i.recommender||'未知'}</div></div>
+      <div class="list-actions">
+        ${!i.done?`<button class="btn btn-sm btn-primary" onclick="toggleLeisure(${i.id})">完成</button>`:'<button class="btn btn-sm btn-secondary" onclick="toggleLeisure('+i.id+')">撤销</button>'}
+        <button class="btn btn-sm btn-secondary" onclick="editLeisure(${i.id})">编辑</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteLeisure(${i.id})">删</button>
+      </div></div>`
+  ).join('');
+}
+
+function toggleLeisure(id) {
+  const items = STORE.get('leisure', []);
+  const i = items.find(x => x.id === id);
+  if (i) { i.done = !i.done; STORE.set('leisure', items); renderLeisure(); }
+}
+
+function editLeisure(id) {
+  const items = STORE.get('leisure', []);
+  const i = items.find(x => x.id === id);
+  if (!i) return;
+  const name = prompt('编辑名称:', i.name);
+  if (name === null) return;
+  const rec = prompt('编辑推荐人:', i.recommender);
+  if (name.trim()) i.name = name.trim();
+  if (rec !== null) i.recommender = rec.trim();
+  STORE.set('leisure', items);
+  renderLeisure();
+}
+
+function deleteLeisure(id) {
+  showConfirm('确定删除吗？', () => {
+    STORE.set('leisure', STORE.get('leisure', []).filter(i => i.id !== id));
+    renderLeisure();
+  });
+}
+
+// ========== Expense ==========
+function addExpense() {
+  const amount = parseFloat(document.getElementById('expenseAmount').value);
+  const category = document.getElementById('expenseCategory').value;
+  const note = document.getElementById('expenseNote').value.trim();
+  const time = pickerInstances.expenseTimePicker.get();
+  if (!amount || amount <= 0) return showToast('请输入有效金额 💰');
+  const expenses = STORE.get('expenses', []);
+  expenses.push({ id: Date.now(), amount, category, note, time, date: today() });
+  STORE.set('expenses', expenses);
+  document.getElementById('expenseAmount').value = '';
+  document.getElementById('expenseNote').value = '';
+  showToast('记账成功 💸');
+  renderExpense();
+}
+
+function renderExpense() {
+  const expenses = STORE.get('expenses', []).sort((a, b) => {
+    const da = a.date + ' ' + a.time, db = b.date + ' ' + b.time;
+    return db.localeCompare(da);
+  });
+  if (!expenses.length) {
+    document.getElementById('expenseList').innerHTML = '<div class="empty-state"><span class="emoji">💰</span><p>还没有记账记录~</p></div>';
+    return;
+  }
+  document.getElementById('expenseList').innerHTML = expenses.map(e =>
+    `<div class="list-item"><div class="list-info"><div class="title">¥${e.amount.toFixed(2)} · ${e.category}</div><div class="sub">${e.date} ${e.time}${e.note?' · '+e.note:''}</div></div>
+      <div class="list-actions">
+        <button class="btn btn-sm btn-secondary" onclick="editExpense(${e.id})">编辑</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteExpense(${e.id})">删</button>
+      </div></div>`
+  ).join('');
+}
+
+function editExpense(id) {
+  const expenses = STORE.get('expenses', []);
+  const e = expenses.find(x => x.id === id);
+  if (!e) return;
+  const amount = prompt('修改金额:', e.amount);
+  if (amount === null) return;
+  const note = prompt('修改备注:', e.note);
+  e.amount = parseFloat(amount) || e.amount;
+  if (note !== null) e.note = note.trim();
+  STORE.set('expenses', expenses);
+  renderExpense();
+}
+
+function deleteExpense(id) {
+  showConfirm('确定删除这条记录吗？', () => {
+    STORE.set('expenses', STORE.get('expenses', []).filter(e => e.id !== id));
+    renderExpense();
+  });
+}
+
+function renderExpenseAnalysis() {
+  const now = new Date();
+  const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const expenses = STORE.get('expenses', []).filter(e => e.date.startsWith(ym));
+  const el = document.getElementById('expenseAnalysis');
+  if (!expenses.length) {
+    el.innerHTML = '<div class="empty-state"><span class="emoji">📊</span><p>本月暂无支出数据</p></div>';
+    return;
+  }
+  const total = expenses.reduce((s, e) => s + e.amount, 0);
+  const cats = {};
+  expenses.forEach(e => { cats[e.category] = (cats[e.category] || 0) + e.amount; });
+  const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+  const topCat = sorted[0];
+  const avg = total / now.getDate();
+  let analysis = `本月共支出 ¥${total.toFixed(2)}，日均 ¥${avg.toFixed(2)}。`;
+  if (topCat) analysis += `「${topCat[0]}」占比最高 (${(topCat[1]/total*100).toFixed(1)}%)，`;
+  if (total > 3000) analysis += '支出较多，注意节制哦~ 🌿';
+  else if (total < 1000) analysis += '理财小能手，继续保持！ ⭐';
+  else analysis += '支出在合理范围内~ 🌸';
+
+  const top3 = [...expenses].sort((a, b) => b.amount - a.amount).slice(0, 3);
+  el.innerHTML = `<div class="analysis-card">
+    <div class="analysis-total">本月总支出: ¥${total.toFixed(2)}</div>
+    <div class="category-bar">${sorted.map(([c, a]) => `<div class="category-segment" style="width:${a/total*100}%;background:${CAT_COLORS[c]||'#90A4AE'}" title="${c}"></div>`).join('')}</div>
+    <div class="category-legend">${sorted.map(([c, a]) => `<div class="legend-item"><div class="legend-dot" style="background:${CAT_COLORS[c]}"></div>${c} ¥${a.toFixed(0)} (${(a/total*100).toFixed(0)}%)</div>`).join('')}</div>
+    <p style="font-size:.9rem;margin-top:12px;line-height:1.6">${analysis}</p>
+    <h4 style="margin-top:12px;color:var(--green-dark)">🏆 TOP3 支出</h4>
+    <div class="top3-list">${top3.map((e, i) => `<div class="top3-item"><span>${i+1}. ${e.note||e.category}</span><span>¥${e.amount.toFixed(2)}</span></div>`).join('')}</div>
+  </div>`;
+}
+
+// ========== Init ==========
+function init() {
+  todoViewDate = today();
+  diaryDate = today();
+  weightUnit = STORE.get('weightUnit', 'kg');
+  if (Array.isArray(weightUnit)) weightUnit = 'kg';
+  createDatePicker('weightDatePicker', today());
+  createTimePicker('mealTimePicker', nowTime());
+  createDatePicker('eventDatePicker', today());
+  createTimePicker('expenseTimePicker', nowTime());
+  createDatePicker('todoViewDatePicker', today(), (d) => { todoViewDate = d; renderTodos(); });
+  renderHome();
+  checkReminders();
+  setInterval(() => {
+    const td = today();
+    if (STORE.get('lastTodoDate', '') !== td) {
+      todoViewDate = td;
+      diaryDate = td;
+      if (pickerInstances.todoViewDatePicker) pickerInstances.todoViewDatePicker.set(td);
+      if (pickerInstances.weightDatePicker) pickerInstances.weightDatePicker.set(td);
+      if (pickerInstances.eventDatePicker) pickerInstances.eventDatePicker.set(td);
+      if (pickerInstances.diaryDatePicker) pickerInstances.diaryDatePicker.set(td);
+      const active = document.querySelector('.page.active');
+      const id = active ? active.id : 'page-home';
+      if (id === 'page-home') renderHome();
+      else if (id === 'page-todo') renderTodos();
+      else if (id === 'page-diary') renderDiary();
+      else if (id === 'page-food') renderFood();
+      else if (id === 'page-event') renderEvents();
+    }
+  }, 30000);
+}
+
+init();
+</script>
+</body>
+</html>
